@@ -1,7 +1,31 @@
-POST http://localhost:3000/signin 
+POST http://localhost:3000/search-blogs
 Content-Type: application/json
 
 {
-    "email": "kunaa@gmail.com",
-    "password": "Kunaal"
+    "tag":"ai"
 }
+# POST http://localhost:3000/create-blog
+# 
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzg1ZDg5YzliZGZjMGVhYjQzNjZkYiIsImlhdCI6MTc2OTQ5NjY3OX0.At6JWHALApp-8STo421J1eEMYKQbJlKrAcnPgxwZnIo
+
+# {
+#     "title":"test title !@#t yy 9$%",
+#     "banner":"https://example.com/image-url",
+#     "des":"nvksdkn",
+#     "content":{ 
+#         "blocks":[1,2]
+#     },
+#     "tags":["ags1","bvv"]
+# }
+
+#  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzg1ZDg5YzliZGZjMGVhYjQzNjZkYiIsImlhdCI6MTc2OTQ5NTk0NX0.caTZ6WrOaCIcxYnim-H0JsY7t-8NjGEyl1DylRhm-u4"
+# POST http://localhost:3000/signin
+# Content-Type: application/json
+
+# {
+#     "email":"vakeel@gamil.com",
+#     "password":"vakeeL@23"
+# }
+
+
+
