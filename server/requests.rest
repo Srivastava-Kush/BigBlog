@@ -1,8 +1,8 @@
-POST http://localhost:3000/search-blogs
+POST http://localhost:3000/search-users
 Content-Type: application/json
 
 {
-    "tag":"ai"
+    "query":"kush"
 }
 # POST http://localhost:3000/create-blog
 # 

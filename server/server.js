@@ -283,8 +283,14 @@ app.get("/trending-blogs", (req, res) => {
 });
 
 app.post("/search-blogs", (req, res) => {
-  let { tag, page } = req.body;
-  let findQuery = { tags: tag, draft: false };
+  let { tag, page, query } = req.body;
+  let findQuery;
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+  }
+
   let maxLimit = 2;
   Blog.find(findQuery)
     .populate(
@@ -393,8 +399,13 @@ app.post("/all-latest-blogs-count", (req, res) => {
 });
 
 app.post("/search-blogs-count", (req, res) => {
-  let { tag } = req.body;
-  let findQuery = { tags: tag, draft: false };
+  let { tag, page, query } = req.body;
+  let findQuery;
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+  }
   Blog.countDocuments(findQuery)
     .then((count) => {
       return res.status(200).json({ totalDocs: count });
@@ -404,6 +415,20 @@ app.post("/search-blogs-count", (req, res) => {
     });
 });
 
+app.post("/search-users", (req, res) => {
+  let { query } = req.body;
+  User.find({ "personal_info.username": new RegExp(query, "i") })
+    .limit(50)
+    .select(
+      "personal_info.fullname personal_info.profile_img personal_info.username -_id",
+    )
+    .then((users) => {
+      return res.status(200).json({ users });
+    })
+    .catch((err) => {
+      return res.status.json({ error: err.message });
+    });
+});
 //if draft not provided . then draft becomes false(Boolean(undefined)=false) and if we provided anything it becomes true
 app.listen(PORT_NUMBER, () => {
   console.log("listening on port ->" + PORT_NUMBER);
