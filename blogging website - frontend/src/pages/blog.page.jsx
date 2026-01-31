@@ -6,6 +6,7 @@ import axios from "axios";
 import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
+import BlogContent from "../components/blog-content.component";
 export const BlogStructure = {
   title: "",
   des: "",
@@ -103,6 +104,7 @@ const BlogPage = () => {
             <BlogInteraction />
             <div className="my-12 font-gelasio blog-page-content">
               {content[0].blocks.map((block, i) => {
+                console.log(block);
                 return (
                   <div key={i}>
                     <BlogContent block={block} />
