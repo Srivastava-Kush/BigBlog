@@ -283,15 +283,21 @@ app.get("/trending-blogs", (req, res) => {
 });
 
 app.post("/search-blogs", (req, res) => {
-  let { tag, page, query } = req.body;
+  let { tag, page, author, query, limit, eliminate_blog } = req.body;
   let findQuery;
   if (tag) {
-    findQuery = { tags: tag, draft: false };
+    findQuery = {
+      tags: { $in: [tag] },
+      draft: false,
+      blog_id: { $ne: eliminate_blog },
+    };
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
+  } else if (author) {
+    findQuery = { author, draft: false };
   }
 
-  let maxLimit = 2;
+  let maxLimit = limit ? limit : 2;
   Blog.find(findQuery)
     .populate(
       "author",
@@ -399,12 +405,14 @@ app.post("/all-latest-blogs-count", (req, res) => {
 });
 
 app.post("/search-blogs-count", (req, res) => {
-  let { tag, page, query } = req.body;
+  let { tag, page, author, query } = req.body;
   let findQuery;
   if (tag) {
     findQuery = { tags: tag, draft: false };
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
+  } else if (author) {
+    findQuery = { author, draft: false };
   }
   Blog.countDocuments(findQuery)
     .then((count) => {
@@ -429,7 +437,46 @@ app.post("/search-users", (req, res) => {
       return res.status.json({ error: err.message });
     });
 });
+
+app.post("/get-profile", (req, res) => {
+  let { username } = req.body;
+  User.findOne({ "personal_info.username": username })
+    .select("-personal_info.password -google_auth -updatedAt -blogs")
+    .then((users) => {
+      return res.status(200).json(users);
+    })
+    .catch((err) => {
+      return res.status.json({ error: err.message });
+    });
+});
 //if draft not provided . then draft becomes false(Boolean(undefined)=false) and if we provided anything it becomes true
+
+app.post("/get-blog", (req, res) => {
+  let { blog_id } = req.body;
+  let incrementVal = 1;
+  //We use update as we need to increment total_reads : D
+  Blog.findOneAndUpdate(
+    { blog_id },
+    { $inc: { "activity.total_reads": incrementVal } },
+  )
+    .populate(
+      "author",
+      "personal_info.fullname personal_info.username personal_info.profile_img",
+    )
+    .select("title des banner activity content publishedAt blog_id tags")
+    .then((blog) => {
+      User.findOneAndUpdate(
+        { "personal_info.username": blog.author.personal_info.username },
+        { $inc: { "account_info.total_reads": incrementVal } },
+      ).catch((err) => {
+        return res.status(500).json({ error: err.message });
+      });
+      return res.status(200).json({ blog });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
 app.listen(PORT_NUMBER, () => {
   console.log("listening on port ->" + PORT_NUMBER);
 });

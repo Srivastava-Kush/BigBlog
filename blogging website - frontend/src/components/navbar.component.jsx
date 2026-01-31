@@ -23,10 +23,8 @@ const Navbar = () => {
       SetPanelVisible(false);
     }, 200);
   };
-  const {
-    userAuth,
-    userAuth: { access_token, profile_img },
-  } = useContext(UserContext);
+  const { userAuth, userAuth: { access_token, profile_img } = {} } =
+    useContext(UserContext);
   return (
     <>
       <nav className="navbar">

@@ -8,6 +8,7 @@ import LoadMoreDataBtn from "../components/load-more.component";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { filterPaginationData } from "../common/filter-pagination-data";
+import UserCard from "../components/usercard.component";
 
 const SearchPage = () => {
   let { query } = useParams();
@@ -30,7 +31,6 @@ const SearchPage = () => {
         page,
       })
       .then(async ({ data }) => {
-        console.log(data.blogs);
         let formattedData = await filterPaginationData({
           state: blogs,
           data: data.blogs,
@@ -40,7 +40,6 @@ const SearchPage = () => {
           create_new_arr,
         });
         //blogs-> data.blogs
-        console.log(formattedData);
         setBlog(formattedData);
       })
       .catch((err) => {
@@ -110,6 +109,12 @@ const SearchPage = () => {
           </>
           <UserCardWrapper />
         </InPageNavigation>
+      </div>
+      <div className="min-2-[40%] lg:min-w-[350px] max-w-min border-l border-grey pl-8 pt-3 max-md:hidden">
+        <h1 className="text-xl font-medium mb-8">
+          Users related to search<i className="fi fi-rr-user mt-1"></i>
+        </h1>
+        <UserCardWrapper></UserCardWrapper>
       </div>
     </section>
   );
