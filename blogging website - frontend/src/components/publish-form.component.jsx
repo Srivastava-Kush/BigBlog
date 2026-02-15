@@ -4,13 +4,15 @@ import { useContext } from "react";
 import { EditorContext } from "../pages/editor.pages";
 import Tag from "./tags.component.jsx";
 import { UserContext } from "../App.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import axios from "axios";
 
 const PublishForm = () => {
   let characterLimit = 200;
   let tagLimit = 10;
+  let navigate = useNavigate();
+  let { blog_id } = useParams();
   let {
     blog,
     blog: { title, tags, des, banner, content },
@@ -21,8 +23,6 @@ const PublishForm = () => {
   let {
     userAuth: { access_token },
   } = useContext(UserContext);
-
-  let navigate = useNavigate();
 
   const handleDesKeyDown = (e) => {
     if (e.keyCode == 13) {
@@ -61,11 +61,15 @@ const PublishForm = () => {
     };
 
     axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
+      .post(
+        import.meta.env.VITE_SERVER_DOMAIN + "/create-blog",
+        { ...blogObj, id: blog_id },
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
         },
-      })
+      )
       .then(() => {
         e.target.classList.remove("disable");
         toast.dismiss(loadingToast);

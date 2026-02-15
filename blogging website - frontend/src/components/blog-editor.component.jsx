@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import logo from "../imgs/logo.png";
 import defaultBanner from "../imgs/blog banner.png";
 import { useContext, useEffect } from "react";
@@ -15,7 +15,15 @@ const BlogEditor = () => {
   const { blog, setBlog, textEditor, setTextEditor, setEditorState } =
     useContext(EditorContext);
 
-  const { title = "", banner = "", content = {}, tags = [], des = "" } = blog;
+  let { blog_id } = useParams();
+
+  const {
+    title = "",
+    banner = "",
+    content = {},
+    tags = [],
+    des = "",
+  } = blog || {};
 
   let {
     userAuth: { access_token },
@@ -71,11 +79,18 @@ const BlogEditor = () => {
         };
 
         axios
-          .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
+          .post(
+            import.meta.env.VITE_SERVER_DOMAIN + "/create-blog",
+            {
+              ...blogObj,
+              id: blog_id,
             },
-          })
+            {
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+              },
+            },
+          )
           .then(() => {
             e.target.classList.remove("disable");
             toast.dismiss(loadingToast);
@@ -107,7 +122,7 @@ const BlogEditor = () => {
       setTextEditor(
         new EditorJS({
           holderId: "textEditor",
-          data: content,
+          data: Array.isArray(content) ? content[0] : content,
           tools: tools,
           placeholder: "Let's write an awesome story.",
         }),

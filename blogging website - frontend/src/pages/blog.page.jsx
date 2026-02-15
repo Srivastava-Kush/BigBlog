@@ -7,6 +7,9 @@ import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
 import BlogContent from "../components/blog-content.component";
+import CommentsContainer, {
+  fetchComments,
+} from "../components/comments.component";
 export const BlogStructure = {
   title: "",
   des: "",
@@ -23,6 +26,10 @@ const BlogPage = () => {
   let [blog, setBlog] = useState(BlogStructure);
   let [loadingState, setLoadingState] = useState(true);
   const [similarBlogs, setSimilarBlogs] = useState(null);
+  const [isLikedByUser, setIsLikedByUser] = useState(false);
+  const [commentsWrapper, setCommentsWrapper] = useState(true);
+  const [totalParentCommentsLoaded, setTotalParentCommentsLoaded] = useState(0);
+  //just like instagram . Intially we will set number of parent comments.
   let {
     title,
     content,
@@ -39,8 +46,12 @@ const BlogPage = () => {
       .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", {
         blog_id,
       })
-      .then(({ data: { blog } }) => {
-        console.log(blog.tags);
+      .then(async ({ data: { blog } }) => {
+        blog.comments = await fetchComments({
+          blog_id: blog._id,
+          setParentCommentCountFun: setTotalParentCommentsLoaded,
+        });
+
         setBlog(blog);
         axios
           .post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
@@ -49,7 +60,6 @@ const BlogPage = () => {
             eliminate_blog: blog_id,
           })
           .then(({ data }) => {
-            console.log(data.blogs);
             setSimilarBlogs(data.blogs);
           })
           .catch((err) => {
@@ -67,6 +77,9 @@ const BlogPage = () => {
     setBlog(BlogStructure);
     setSimilarBlogs(null);
     setLoadingState(true);
+    setIsLikedByUser(false);
+    setCommentsWrapper(false);
+    setTotalParentCommentsLoaded(0);
   };
   useEffect(() => {
     resetStates();
@@ -77,7 +90,19 @@ const BlogPage = () => {
       {loadingState ? (
         <Loader />
       ) : (
-        <BlogContext.Provider value={{ blog, setBlog }}>
+        <BlogContext.Provider
+          value={{
+            blog,
+            setBlog,
+            setIsLikedByUser,
+            isLikedByUser,
+            commentsWrapper,
+            setCommentsWrapper,
+            totalParentCommentsLoaded,
+            setTotalParentCommentsLoaded,
+          }}
+        >
+          <CommentsContainer />
           <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
             <img src={banner} className="aspect-video" />
             <div className="mt-12">
@@ -104,7 +129,6 @@ const BlogPage = () => {
             <BlogInteraction />
             <div className="my-12 font-gelasio blog-page-content">
               {content[0].blocks.map((block, i) => {
-                console.log(block);
                 return (
                   <div key={i}>
                     <BlogContent block={block} />
