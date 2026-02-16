@@ -23,7 +23,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
       comments,
       comments: { results: commentsArr },
       activity,
-      activity: { total_parents_comments },
+      activity: { total_parent_comments },
       author: {
         personal_info: { username: blog_author },
       },
@@ -39,7 +39,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
   const [isReplying, setReplying] = useState(false);
 
   const deleteComments = (e) => {
-    e.target.setAttribute("disable", true);
+    e.target.setAttribute("disabled", true);
 
     axios
       .post(
@@ -52,7 +52,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
         },
       )
       .then(() => {
-        e.target.removeAttribute("disable");
+        e.target.removeAttribute("disableb");
         removeCommentsCards(index + 1, true);
       })
       .catch((err) => console.log(err));
@@ -92,7 +92,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
           parentIndex
         ].children.filter((child) => child != _id);
 
-        if (comments[parentIndex].children.length) {
+        if (!commentsArr[parentIndex].children.length) {
           commentsArr[parentIndex].isReplyLoaded = false;
         }
       }
@@ -108,30 +108,29 @@ const CommentCard = ({ index, leftVal, commentData }) => {
       ...blog,
       comments: { results: commentsArr },
       activity: {
-        activity: {
-          ...activity,
-          total_parents_comments:
-            total_parents_comments -
-            (commentData.childrenLevel == 0 && isDelete ? 1 : 0),
-        },
+        ...activity,
+        total_parent_comments:
+          total_parent_comments -
+          (commentData.childrenLevel == 0 && isDelete ? 1 : 0),
       },
     });
   };
 
-  const loadReplies = ({ skip = 0 }) => {
-    if (children.length) {
+  const loadReplies = ({ skip = 0, currentIndex = index }) => {
+    if (commentsArr[currentIndex].children.length) {
       hideReplies();
 
       axios
         .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-replies", {
-          _id,
+          _id: commentsArr[currentIndex]._id,
           skip,
         })
         .then(({ data: { replies } }) => {
-          commentData.isReplyLoaded = true;
+          commentsArr[currentIndex].isReplyLoaded = true;
           for (let i = 0; i < replies.length; i++) {
-            replies[i].childrenLevel = commentData.childrenLevel + 1;
-            commentsArr.splice(index + 1 + i + skip, 0, replies[i]);
+            replies[i].childrenLevel =
+              commentsArr[currentIndex].childrenLevel + 1;
+            commentsArr.splice(currentIndex + 1 + i + skip, 0, replies[i]);
           }
           setBlog({ ...blog, comments: { ...comments, results: commentsArr } });
         })
@@ -152,6 +151,76 @@ const CommentCard = ({ index, leftVal, commentData }) => {
     }
     setReplying((preVal) => !preVal);
   };
+
+  const LoadMoreRepliesButton = () => {
+    let parentIndex = getParentIndex();
+
+    let button = (
+      <button
+        onClick={() =>
+          loadReplies({
+            skip: index - parentIndex,
+            currentIndex: parentIndex,
+          })
+        }
+        className="text-dark-grey p-2 px-3 hover:bg-grey/30 rounded-md flex items-center gap-2"
+      >
+        Load More Replies Button
+      </button>
+    );
+
+    if (commentsArr[index + 1]) {
+      if (
+        commentsArr[index + 1].childrenLevel < commentsArr[index].childrenLevel
+      ) {
+        if (index - parentIndex < commentsArr[parentIndex].children.length) {
+          return button;
+        }
+      }
+    } else {
+      if (parentIndex) {
+        if (index - parentIndex < commentsArr[parentIndex].children.length) {
+          return button;
+        }
+      }
+    }
+  };
+  // const LoadMoreRepliesButton = () => {
+  //   const parentIndex = getParentIndex();
+  //   if (parentIndex === undefined) return null;
+
+  //   const parentLevel = commentsArr[parentIndex].childrenLevel;
+
+  //   // count replies currently displayed
+  //   let displayedReplies = 0;
+  //   let i = parentIndex + 1;
+
+  //   while (commentsArr[i] && commentsArr[i].childrenLevel > parentLevel) {
+  //     displayedReplies++;
+  //     i++;
+  //   }
+
+  //   // total replies in DB
+  //   const totalReplies = commentsArr[parentIndex].children.length;
+
+  //   if (displayedReplies < totalReplies) {
+  //     return (
+  //       <button
+  //         onClick={() =>
+  //           loadReplies({
+  //             skip: displayedReplies,
+  //             currentIndex: parentIndex,
+  //           })
+  //         }
+  //         className="text-dark-grey p-2 px-3 hover:bg-grey/30 rounded-md flex items-center gap-2"
+  //       >
+  //         Load More Replies
+  //       </button>
+  //     );
+  //   }
+
+  //   return null;
+  // };
 
   return (
     <div className="w-full" style={{ paddingLeft: `${leftVal * 10}px` }}>
@@ -177,15 +246,15 @@ const CommentCard = ({ index, leftVal, commentData }) => {
               className="text-dark-grey p-2 px-3 hover:bg-grey/30 rounded-md flex items-center gap-2"
               onClick={loadReplies}
             >
-              Show {children.length}Replies
-              <i className="fi fi-rs-comment-dots"></i>
+              <i className="fi fi-rs-comment-dots"></i> {children.length}{" "}
+              Replies
             </button>
           )}
           <button onClick={handleReply} className="underline">
             Reply
           </button>
 
-          {username === commented_by_username || blog_author ? (
+          {username == commented_by_username || username == blog_author ? (
             <button
               className=" p-2 px-3 rounded-md border border-grey hover:bg-red/30 hover:text-red flex items-center ml-auto"
               onClick={deleteComments}
@@ -209,6 +278,8 @@ const CommentCard = ({ index, leftVal, commentData }) => {
         ) : (
           ""
         )}
+
+        <LoadMoreRepliesButton></LoadMoreRepliesButton>
       </div>
     </div>
   );

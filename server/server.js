@@ -640,11 +640,11 @@ app.post("/get-blog-comments", (req, res) => {
 
 app.post("/get-replies", (req, res) => {
   let { _id, skip } = req.body;
-  let maxLimit = 5;
+  let maxLimit = 2;
   Comment.findOne({ _id })
     .populate({
       path: "children",
-      option: {
+      options: {
         limit: maxLimit,
         skip: skip,
         sort: { commentedAt: -1 },
@@ -652,7 +652,7 @@ app.post("/get-replies", (req, res) => {
       populate: {
         path: "commented_by",
         select:
-          "personal_info.profile_img perosnal_info.fullname perosnal_info.username",
+          "personal_info.profile_img personal_info.fullname personal_info.username",
       },
       select: "-blog_is -updatedAt",
     })
@@ -700,7 +700,7 @@ const deleteComments = (_id) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log(err.message);
     });
 };
 
