@@ -27,7 +27,7 @@ const Navbar = () => {
     useContext(UserContext);
   return (
     <>
-      <nav className="navbar">
+      <nav className="navbar z-50">
         <Link to="/" className="flex-none w-10">
           <img src={logo} className="w-full" />
         </Link>

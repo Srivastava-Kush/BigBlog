@@ -720,6 +720,71 @@ app.post("/delete-comment", verifyJWT, (req, res) => {
   });
 });
 
+app.post("/change-password", verifyJWT, (req, res) => {
+  let { currentPassword, newPassword } = req.body;
+
+  if (
+    !passwordRegex.test(currentPassword) ||
+    !passwordRegex.test(newPassword)
+  ) {
+    return res.status(403).json({
+      error:
+        "Password must be 6-20 characters and 1 uppercase,1 numeric,1 lowercase",
+    });
+  }
+
+  User.findOne({ _id: req.user })
+    .then((user) => {
+      if (user.google_auth) {
+        return res.status(403).json({
+          error:
+            "You cannot change password because you logged in through frontend",
+        });
+      }
+
+      bcrypt.compare(
+        currentPassword,
+        user.personal_info.password,
+        (err, result) => {
+          if (err) {
+            return res.status(500).json({
+              error:
+                "Some error occured while changing password, please try again.",
+            });
+          }
+          if (!result) {
+            return res
+              .status(403)
+              .json({ erro: "Incorrect current password." });
+          }
+
+          bcrypt.hash(newPassword, 10, (err, hashed_password) => {
+            User.findOneAndUpdate(
+              { _id: req.user },
+              {
+                "personal_info.password": hashed_password,
+              },
+            )
+              .then((user) => {
+                return res
+                  .status(200)
+                  .json({ status: "password changed successfully" });
+              })
+              .catch((err) => {
+                return res.status(500).json({
+                  error:
+                    "Some error occcured while saving new password , try again",
+                });
+              });
+          });
+        },
+      );
+    })
+    .catch((err) => {
+      return res.status(403).json({ error: "Couldn't find user" });
+    });
+});
+
 app.listen(PORT_NUMBER, () => {
   console.log("listening on port ->" + PORT_NUMBER);
 });
