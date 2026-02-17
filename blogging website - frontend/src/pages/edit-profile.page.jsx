@@ -6,8 +6,10 @@ import AnimationWrapper from "../common/page-animation";
 import Loader from "../components/loader.component";
 import { Toaster, toast } from "react-hot-toast";
 import InputBox from "../components/input.component";
+import { Link } from "react-router-dom";
 
 const EditProfile = () => {
+  let bioLimit = 150;
   let {
     userAuth,
     userAuth: { access_token },
@@ -15,6 +17,7 @@ const EditProfile = () => {
 
   const [profile, setProfile] = useState(profileDataStructure);
   const [loading, setLoading] = useState(true);
+  const [charactersLeft, setCharactersLeft] = useState(bioLimit);
 
   let {
     personal_info: {
@@ -28,6 +31,11 @@ const EditProfile = () => {
     social_links,
     joinedAt,
   } = profile;
+
+  const handleBioChange = (e) => {
+    setCharactersLeft(bioLimit - e.target.value.length);
+  };
+
   useEffect(() => {
     if (access_token) {
       axios
@@ -101,6 +109,45 @@ const EditProfile = () => {
                 placeholder="Username"
                 icon="fi-rr-at"
               />
+              <p className="text-dark-grey -mt-3">
+                Username will be used to search user and will be visible to
+                others
+              </p>
+              <textarea
+                name="bio"
+                maxLength={bioLimit}
+                className="input-box h-64 lg:h-40 resize-none leading-7 mt-5 pl-5"
+                placeholder="Bio"
+                onChange={handleBioChange}
+              ></textarea>
+              <p className="mt-1 text-dakr-grey">
+                {charactersLeft} characters left
+              </p>
+
+              <p className="my-6 text-dark-grey">
+                Add your social handles below
+              </p>
+              <div className="md:grid md:grid-cols-2 gap-x-6">
+                {Object.keys(social_links).map((key, i) => {
+                  let link = social_links[key];
+                  return (
+                    <InputBox
+                      key={i}
+                      name={key}
+                      type="text"
+                      values={link}
+                      placeholder="https://"
+                      icon={
+                        "fi " +
+                        (key != "website" ? "fi-brands-" + key : "fi-rr-globe")
+                      }
+                    />
+                  );
+                })}
+              </div>
+              <button className="btn-dark w-auto px-10" type="submit">
+                Update
+              </button>
             </div>
           </div>
         </form>
