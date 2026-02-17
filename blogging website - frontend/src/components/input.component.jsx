@@ -1,6 +1,14 @@
 import { useState } from "react";
 
-const InputBox = ({ name, placeholder, type, value, id, icon }) => {
+const InputBox = ({
+  name,
+  placeholder,
+  type,
+  value,
+  id,
+  icon,
+  disable = false,
+}) => {
   const [passVisible, setPassVisible] = useState(false);
 
   return (
@@ -11,6 +19,7 @@ const InputBox = ({ name, placeholder, type, value, id, icon }) => {
         placeholder={placeholder}
         defaultValue={value}
         id={id}
+        disabled={disable}
         className="input-box"
       />
       <i className={"fi " + icon + " input-icon"}></i>
