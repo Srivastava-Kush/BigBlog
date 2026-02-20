@@ -6,7 +6,7 @@ const SideNav = () => {
   let page = location.pathname.split("/")[2];
   let [pageState, setPageState] = useState(page.replace("-", " "));
   let {
-    userAuth: { access_token },
+    userAuth: { access_token, new_notification_available },
   } = useContext(UserContext);
 
   let [showSideNav, setShowSideNav] = useState(false);
@@ -78,16 +78,26 @@ const SideNav = () => {
               <i className="fi fi-rr-document"></i>
               Blogs
             </NavLink>
+
             <NavLink
-              to="/dashboard/notification"
+              to="/dashboard/notifications"
               onClick={(e) => {
                 setPageState(e.target.innerText);
               }}
               className="sidebar-link"
             >
-              <i className="fi fi-rr-bell"></i>
+              <div className="relative">
+                <i className="fi fi-rr-bell">
+                  {new_notification_available ? (
+                    <span className="bg-red w-2 h-2 rounded-full absolute z-10 top-0 right-0"></span>
+                  ) : (
+                    ""
+                  )}
+                </i>
+              </div>
               Notifications
             </NavLink>
+
             <NavLink
               to="/editor"
               onClick={(e) => {

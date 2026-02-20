@@ -24,15 +24,19 @@
 
 # {
 #     "email":"naune@hotmail.com",
-#     "password":"Naune@23"
+#     "password":"vakeeL@234"
+# }
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTU2NzczMn0.s4LslHPLmoAZ1MRlDGC9cumT8ATxSlqyywTYj0Z9yCo
+# POST http://localhost:3000/change-password
+# Content-Type: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTMxMjkwMX0.Pb2ZEXR8r65w-M7sSchakB1vZB-jqhxGAQL40hM7aAo
+
+# {
+#     "currentPassword":"Naune@23",
+#     "newPassword":"vakeeL@234"
 # }
 
 
-POST http://localhost:3000/change-password
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTMxMjkwMX0.Pb2ZEXR8r65w-M7sSchakB1vZB-jqhxGAQL40hM7aAo
-
-{
-    "currentPassword":"Naune@23",
-    "newPassword":"vakeeL@234"
-}
+GET http://localhost:3000/new-notification
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTU2Nzk2Mn0.aYXN5sD8rxg83mnSW7EYm3gsYc-xXmbiiilRxTtSSKY

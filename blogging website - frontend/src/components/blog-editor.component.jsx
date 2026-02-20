@@ -15,6 +15,8 @@ const BlogEditor = () => {
   const { blog, setBlog, textEditor, setTextEditor, setEditorState } =
     useContext(EditorContext);
 
+  console.log(textEditor.isReady);
+
   let { blog_id } = useParams();
 
   const {
