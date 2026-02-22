@@ -3,6 +3,10 @@ import { UserContext } from "../App";
 import { filterPaginationData } from "../common/filter-pagination-data";
 import axios from "axios";
 import Loader from "../components/loader.component";
+import AnimationWrapper from "../common/page-animation";
+import NoDataMessage from "../components/nodata.component";
+import NotificationCard from "../components/notification-card.component";
+import LoadMoreDataBtn from "../components/load-more.component";
 
 const Notifications = () => {
   const [filter, setFilter] = useState("all");
@@ -78,7 +82,34 @@ const Notifications = () => {
         })}
       </div>
 
-      {notifications == null ? <Loader /> : <>{notifications.results}</>}
+      {notifications == null ? (
+        <Loader />
+      ) : (
+        <>
+          {notifications.results.length ? (
+            notifications.results.map((notif, i) => {
+              return (
+                <AnimationWrapper key={i} transition={{ delay: i * 0.08 }}>
+                  <NotificationCard
+                    data={notif}
+                    index={i}
+                    notificationState={notifications}
+                    setNotificationState={setNotifications}
+                  />
+                </AnimationWrapper>
+              );
+            })
+          ) : (
+            <NoDataMessage message="No notifications available" />
+          )}
+
+          <LoadMoreDataBtn
+            state={notifications}
+            fetchDataFunction={fetchNotifications}
+            additionalParam={{ deletedDocCount: notifications.deletedDocCount }}
+          />
+        </>
+      )}
     </div>
   );
 };

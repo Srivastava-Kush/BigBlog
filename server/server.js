@@ -898,6 +898,9 @@ app.post("/notifications", verifyJWT, (req, res) => {
     skipDocs -= deletedDocCount;
   }
 
+  //If you create a reply on your own comment then the author of blog won't get any notiification for it.
+  //Altho it should ig. But for now it doesn't
+
   Notification.find(findQuery)
     .skip(skipDocs)
     .limit(maxLimit)
