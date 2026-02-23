@@ -28,6 +28,7 @@ const CommentField = ({
     },
     setTotalParentCommentsLoaded,
   } = useContext(BlogContext);
+
   const handleComment = () => {
     if (!access_token) {
       return toast.error("login to leave a comment");

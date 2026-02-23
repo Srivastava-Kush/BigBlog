@@ -1,22 +1,4 @@
-# POST http://localhost:3000/get-profile
-# Content-Type: application/json
 
-# {
-#     "username":"kush"
-# }
-# # POST http://localhost:3000/create-blog
-# # 
-# # Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzg1ZDg5YzliZGZjMGVhYjQzNjZkYiIsImlhdCI6MTc2OTQ5NjY3OX0.At6JWHALApp-8STo421J1eEMYKQbJlKrAcnPgxwZnIo
-
-# {
-#     "title":"test title !@#t yy 9$%",
-#     "banner":"https://example.com/image-url",
-#     "des":"nvksdkn",
-#     "content":{ 
-#         "blocks":[1,2]
-#     },
-#     "tags":["ags1","bvv"]
-# }
 
 #  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzg1ZDg5YzliZGZjMGVhYjQzNjZkYiIsImlhdCI6MTc2OTQ5NTk0NX0.caTZ6WrOaCIcxYnim-H0JsY7t-8NjGEyl1DylRhm-u4"
 # POST http://localhost:3000/signin
@@ -27,16 +9,13 @@
 #     "password":"vakeeL@234"
 # }
 
-# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTU2NzczMn0.s4LslHPLmoAZ1MRlDGC9cumT8ATxSlqyywTYj0Z9yCo
-# POST http://localhost:3000/change-password
-# Content-Type: application/json
-# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTMxMjkwMX0.Pb2ZEXR8r65w-M7sSchakB1vZB-jqhxGAQL40hM7aAo
-
-# {
-#     "currentPassword":"Naune@23",
-#     "newPassword":"vakeeL@234"
-# }
 
 
-GET http://localhost:3000/new-notification
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTU2Nzk2Mn0.aYXN5sD8rxg83mnSW7EYm3gsYc-xXmbiiilRxTtSSKY
+POST http://localhost:3000/user-written-blogs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTQwOTQzNThlZTcwZDk0OGQyZTg3NiIsImlhdCI6MTc3MTgyNjMzNn0.d38rXvw9lyKt0evJLRR3yIVii9paG99j46KLkeoktww
+Content-Type: application/json 
+
+{
+    "page":1,
+    "draft":false
+}

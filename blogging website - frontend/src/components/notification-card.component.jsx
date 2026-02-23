@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { getDay } from "../common/date";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import NotificationCommentField from "./notification-comment-field.component";
+import { UserContext } from "../App";
 
 const NotificationCard = ({
   data,
@@ -9,16 +10,29 @@ const NotificationCard = ({
   notificationState,
   setNotificationState,
 }) => {
+  console.log(data);
   let {
-    blog: { title, blog_id },
+    blog: { _id, title, blog_id },
     replied_on_comment,
     type,
     comment,
     createdAt,
+    reply,
+    user,
     user: {
       personal_info: { profile_img, fullname, username },
     },
+    _id: notification_id,
   } = data;
+
+  let {
+    userAuth: {
+      access_token,
+      profile_img: author_profile_img,
+      username: author_username,
+    },
+  } = useContext(UserContext);
+
   const [isReplying, setIsReplying] = useState(false);
 
   const handleReplyClick = () => {
@@ -74,12 +88,16 @@ const NotificationCard = ({
         <p>{getDay(createdAt)}</p>
         {type != "like" ? (
           <>
-            <button
-              className="hover:text-black underline"
-              onClick={handleReplyClick}
-            >
-              Reply
-            </button>
+            {!reply ? (
+              <button
+                className="hover:text-black underline"
+                onClick={handleReplyClick}
+              >
+                Reply
+              </button>
+            ) : (
+              ""
+            )}
             <button className="hover:text-black underline">Delete</button>
           </>
         ) : (
@@ -89,7 +107,46 @@ const NotificationCard = ({
 
       {isReplying ? (
         <div className="mt-8">
-          <NotificationCommentField></NotificationCommentField>
+          <NotificationCommentField
+            _id={_id}
+            blog_author={user}
+            index={index}
+            replyingTo={comment._id}
+            setReplying={setIsReplying}
+            notification_id={notification_id}
+            notificationData={notificationState}
+          ></NotificationCommentField>
+        </div>
+      ) : (
+        ""
+      )}
+
+      {reply ? (
+        <div className="ml-20 p-5 bg-grey mt-5 rounded-md">
+          <div className="flex gap-3 mb-3">
+            <img
+              src={author_profile_img}
+              className="w-8 h-8 rounded-full"
+            ></img>
+            <div>
+              <h1>
+                <Link
+                  to={`/user/${author_username}`}
+                  className="mx-1 tex-black underline"
+                >
+                  @{author_username}
+                </Link>
+                <span className="font-normal">replied to</span>
+                <Link
+                  to={`/user/${username}`}
+                  className="mx-1 text-black underline"
+                >
+                  {username}
+                </Link>
+              </h1>
+            </div>
+          </div>
+          <p className="ml-14 font-gelasio text-xl my-2">{reply.comment}</p>
         </div>
       ) : (
         ""
