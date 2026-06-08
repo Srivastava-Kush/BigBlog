@@ -10,6 +10,7 @@ import Blog from "./Schema/Blog.js";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import admin from "firebase-admin";
+import axios from "axios";
 // import serviceAccountKey from "./bigblog-3e96f-firebase-adminsdk-fbsvc-fd79b68a59.json" assert { type: "json" };
 import { getAuth } from "firebase-admin/auth";
 import cloudinary from "./config/cloudinary.js";
@@ -18,7 +19,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { populate } from "dotenv";
-import { count } from "console";
+import { count, log } from "console";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,7 @@ mongoose.connect(process.env.DB_LOCATION, { autoIndex: true });
 app.use(express.json());
 app.use(cors());
 let PORT_NUMBER = 3000;
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:8000";
 let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
@@ -362,12 +364,21 @@ app.post("/create-blog", verifyJWT, (req, res) => {
       .replace(/\s+/g, "-")
       .trim() + nanoid();
 
+  const triggerIndexRebuild = () => {
+    axios
+      .post(`${ML_SERVICE_URL}/index-blog`, {})
+      .catch((err) =>
+        console.warn("[index-blog] ML service not reachable:", err.message),
+      );
+  };
+
   if (id) {
     Blog.findOneAndUpdate(
       { blog_id: id },
       { title, des, banner, content, tags, draft: draft ? draft : false },
     )
       .then((blog) => {
+        if (!draft) triggerIndexRebuild();
         return res.status(200).json({ id: blog_id });
       })
       .catch((err) => {
@@ -399,6 +410,7 @@ app.post("/create-blog", verifyJWT, (req, res) => {
           },
         )
           .then((user) => {
+            if (!draft) triggerIndexRebuild();
             return res.status(200).json({ id: blog.blog_id });
           })
           .catch((err) => {
@@ -1011,6 +1023,62 @@ app.post("/delete-blogs", verifyJWT, (req, res) => {
     .catch((err) => {
       return res.status(500).json({ error: err.message });
     });
+});
+
+app.post("/semantic-search", async (req, res) => {
+  const { query } = req.body;
+  if (!query || !query.trim()) {
+    return res.status(400).json({ error: "query is required" });
+  }
+
+  const startTime = Date.now();
+  try {
+    const mlRes = await axios.post(`${ML_SERVICE_URL}/semantic-search`, {
+      query,
+      top_k: 20,
+    });
+
+    const data = mlRes.data;
+
+    // Populate author info for each blog that was returned
+    const blogIds = data.blogs.map((b) => b.blog_id);
+    const blogsWithAuthor = await Blog.find({
+      blog_id: { $in: blogIds },
+      draft: false,
+    })
+      .populate(
+        "author",
+        "personal_info.fullname personal_info.profile_img personal_info.username -_id",
+      )
+      .select("blog_id title des tags banner activity publishedAt author -_id");
+
+    // Merge author info into ML results, preserving score order
+    const authorMap = {};
+    blogsWithAuthor.forEach((b) => {
+      authorMap[b.blog_id] = b.toObject();
+    });
+
+    const enriched = data.blogs
+      .filter((b) => authorMap[b.blog_id])
+      .map((b) => ({
+        ...authorMap[b.blog_id],
+        similarity_score: b.similarity_score,
+        relevance_pct: b.relevance_pct,
+      }));
+
+    const elapsed = Date.now() - startTime;
+    console.log(
+      `[semantic-search] query="${query}" results=${enriched.length} time=${elapsed}ms`,
+    );
+
+    return res.status(200).json({ blogs: enriched, elapsed_ms: elapsed });
+  } catch (err) {
+    const elapsed = Date.now() - startTime;
+    console.error(`[semantic-search] failed after ${elapsed}ms:`, err.message);
+    return res
+      .status(500)
+      .json({ error: "Semantic search unavailable", detail: err.message });
+  }
 });
 
 app.listen(PORT_NUMBER, () => {

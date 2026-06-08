@@ -1,0 +1,34 @@
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Node modules (root, server, frontend)
+node_modules/
+server/node_modules
+
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+frontend/build/
+server/dist/
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/*
+.env
+requests.rest
+
+
+test_results.log
+test_search.py

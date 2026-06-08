@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { getDay } from "../common/date";
 
-const BlogPostCard = ({ content, author }) => {
+const BlogPostCard = ({ content, author, relevanceScore }) => {
   let {
     publishedAt,
     tags,
@@ -25,6 +25,11 @@ const BlogPostCard = ({ content, author }) => {
             {fullname}@{username}
           </p>
           <p className="min-w-fit">{getDay(publishedAt)}</p>
+          {relevanceScore !== undefined && (
+            <span className="ml-auto bg-black text-white text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">
+              {relevanceScore.toFixed(1)}% match
+            </span>
+          )}
         </div>
         <h1 className="blog-title">{title}</h1>
         <p className="my-3 text-xl font-gelasio leading-7 max-sm:hidden md:max-[1100px]:hidden line-clamp-2">

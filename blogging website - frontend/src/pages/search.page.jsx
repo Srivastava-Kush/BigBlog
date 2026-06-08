@@ -15,6 +15,9 @@ const SearchPage = () => {
 
   let [blogs, setBlog] = useState(null);
   let [users, setUsers] = useState(null);
+  let [aiSearch, setAiSearch] = useState(false);
+  let [aiResults, setAiResults] = useState(null);
+  let [aiLoading, setAiLoading] = useState(false);
 
   const fetchUsers = () => {
     axios
@@ -39,22 +42,53 @@ const SearchPage = () => {
           data_to_send: { query },
           create_new_arr,
         });
-        //blogs-> data.blogs
         setBlog(formattedData);
       })
       .catch((err) => {
         console.log(err);
       });
   };
+
+  const fetchAiResults = () => {
+    setAiLoading(true);
+    setAiResults(null);
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + "/semantic-search", {
+        query,
+      })
+      .then(({ data }) => {
+        setAiResults(data.blogs || []);
+      })
+      .catch((err) => {
+        console.log(err);
+        setAiResults([]);
+      })
+      .finally(() => {
+        setAiLoading(false);
+      });
+  };
+
   const resetState = () => {
     setBlog(null);
     setUsers(null);
+    setAiResults(null);
   };
+
   useEffect(() => {
     resetState();
     SearchBlogs({ page: 1, create_new_arr: true });
     fetchUsers();
   }, [query]);
+
+  useEffect(() => {
+    if (aiSearch) {
+      fetchAiResults();
+    }
+  }, [aiSearch, query]);
+
+  const handleToggle = (mode) => {
+    setAiSearch(mode === "ai");
+  };
 
   const UserCardWrapper = () => {
     return (
@@ -78,6 +112,73 @@ const SearchPage = () => {
       </>
     );
   };
+
+  const SearchToggle = () => (
+    <div className="flex items-center gap-3 mb-6 mt-2">
+      <div className="flex bg-grey rounded-full p-1 gap-1">
+        <button
+          onClick={() => handleToggle("regular")}
+          className={
+            "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 " +
+            (!aiSearch
+              ? "bg-black text-white shadow"
+              : "text-dark-grey hover:text-black")
+          }
+        >
+          Regular Search
+        </button>
+        <button
+          onClick={() => handleToggle("ai")}
+          className={
+            "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 " +
+            (aiSearch
+              ? "bg-black text-white shadow"
+              : "text-dark-grey hover:text-black")
+          }
+        >
+          <i className="fi fi-rr-magic-wand text-xs"></i>
+          AI Search
+        </button>
+      </div>
+      {aiSearch && (
+        <p className="text-sm text-dark-grey italic">
+          Showing results by meaning, not just keywords
+        </p>
+      )}
+    </div>
+  );
+
+  const AiResultsList = () => {
+    if (aiLoading) {
+      return (
+        <div className="flex flex-col items-center gap-3 py-10 text-dark-grey">
+          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm">Searching by meaning…</p>
+        </div>
+      );
+    }
+    if (!aiResults) return null;
+    if (!aiResults.length) {
+      return <NoDataMessage message="No semantically similar blogs found" />;
+    }
+    return (
+      <>
+        {aiResults.map((blog, i) => (
+          <AnimationWrapper
+            key={i}
+            transition={{ duration: 1, delay: i * 0.05 }}
+          >
+            <BlogPostCard
+              content={blog}
+              author={blog.author.personal_info}
+              relevanceScore={blog.relevance_pct}
+            />
+          </AnimationWrapper>
+        ))}
+      </>
+    );
+  };
+
   return (
     <section className="h-cover flex justify-center gap-10">
       <div className="w-full">
@@ -86,7 +187,10 @@ const SearchPage = () => {
           defaultHidden={["Accounts Matched"]}
         >
           <>
-            {blogs == null ? (
+            <SearchToggle />
+            {aiSearch ? (
+              <AiResultsList />
+            ) : blogs == null ? (
               <Loader />
             ) : blogs.results.length ? (
               blogs.results.map((blog, i) => {
@@ -105,7 +209,9 @@ const SearchPage = () => {
             ) : (
               <NoDataMessage message="No Blogs Published"></NoDataMessage>
             )}
-            <LoadMoreDataBtn state={blogs} fetchDataFunction={SearchBlogs} />
+            {!aiSearch && (
+              <LoadMoreDataBtn state={blogs} fetchDataFunction={SearchBlogs} />
+            )}
           </>
           <UserCardWrapper />
         </InPageNavigation>

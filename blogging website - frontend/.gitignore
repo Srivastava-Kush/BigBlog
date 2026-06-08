@@ -25,4 +25,6 @@ server/dist/
 Thumbs.db
 .vscode/
 .idea/
-server/bigblog-3e96f-firebase-adminsdk-fbsvc-fd79b68a59.json
+node_modules/*
+.env
+requests.rest
