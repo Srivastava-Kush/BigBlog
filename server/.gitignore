@@ -28,5 +28,7 @@ Thumbs.db
 node_modules/*
 .env
 requests.rest
+# .gitignore
+RESUME_BULLETS.md
 
 bigblog-3e96f-firebase-adminsdk-fbsvc-fd79b68a59.json
