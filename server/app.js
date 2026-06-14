@@ -26,6 +26,10 @@ import cloudinary from "./config/cloudinary.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import typeDefs from "./graphql/typeDefs.js";
+import resolvers from "./graphql/resolvers.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -827,5 +831,26 @@ app.post("/semantic-search", async (req, res) => {
     return res.status(500).json({ error: "Semantic search unavailable", detail: err.message });
   }
 });
+
+// ── GraphQL / Apollo Server 4 ────────────────────────────────────────────────
+const apolloServer = new ApolloServer({ typeDefs, resolvers });
+await apolloServer.start();
+
+app.use(
+  "/graphql",
+  expressMiddleware(apolloServer, {
+    context: async ({ req }) => {
+      const authHeader = req.headers["authorization"];
+      const token = authHeader && authHeader.split(" ")[1];
+      if (!token) return { user: null };
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return { user: decoded.id };
+      } catch {
+        return { user: null };
+      }
+    },
+  })
+);
 
 export default app;
